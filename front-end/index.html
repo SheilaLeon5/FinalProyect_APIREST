@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.0.2/dist/sweetalert2.min.css">
+  <meta charset="utf-8"/>
+    <style>
+      #app{
+            
+          background-image: url(https://i.pinimg.com/originals/59/44/55/594455ac38f0a40230f18d0a126884dd.jpg);
+
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: cover;
+      }
+    </style>
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>   
+       <!-- BUTTON NEW -->                
+        <v-card class="mx-auto mt-5" color="transparent" max-width="1280" elevation="0">            
+        <v-btn class="mx-2" fab  x-large dark color="teal lighten-3" @click="newForm()"><h2>NEW</h2></v-btn>  
+                 
+        <!-- TABLE AND FORM -->
+        <v-simple-table class="mt-5">
+            <template v-slot:default>
+                <thead>
+                    <tr class="teal">
+                        <th class="white--text">ID</th>
+                        <th class="white--text">TITLE</th>
+                        <th class="white--text">INGREDIENTS</th>
+                        <th class="white--text">DESCRIPTION</th>
+                        <th class="white--text">DIFFICULTY</th>
+                        <th class="white--text">PERSON</th>
+                        <th class="white--text">TIME</th>
+                        <th class="white--text text-center">TYPE FOOD</th>
+                        <th class="white--text text-center">ACTIONS</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    <tr v-for="recipe in recipes" :key="recipe.recipeID">
+                      <td>{{ recipe.recipeID }}</td>
+                      <td>{{ recipe.title }}</td>
+                      <td><br><br>{{ recipe.ingredients }}<br><br></td>
+                      <td><br><br> {{ recipe.description }} <br><br></td>
+                      <td>{{ recipe.difficulty }}</td>
+                      <td>{{ recipe.person }}</td>
+                      <td>{{ recipe.time }}</td>
+                      <td>{{ recipe.typeFood }}</td>
+
+                      <td>
+                          <v-btn class="teal accent-2" dark small fab  @click="editForm(recipe.recipeID, recipe.title, recipe.ingredients, recipe.descripcion, recipe.difficulty, recipe.person, recipe.time, recipe.typeFood)"><v-icon>mdi-pencil</v-icon></v-btn>
+                          <br><br>
+                          <v-btn class="red accent-2" fab dark small @click="deleteRecipe(recipe.recipeID)"><v-icon>mdi-delete</v-icon></v-btn>
+                      </td>
+
+                    </tr>
+                </tbody>
+
+            </template>
+        </v-simple-table>
+        </v-card>        
+      <!-- DIALOGUE COMPONENT -->
+      <v-dialog v-model="dialog" max-width="500">        
+        <v-card>
+          <v-card-title class="teal darken-4 white--text">Recipe</v-card-title>    
+          <v-card-text>            
+            <v-form>             
+              <v-container>
+                <v-row>
+                  <input v-model="recipe.recipeID" hidden></input>
+                  <v-col cols="12" md="12">
+                    <v-text-field v-model="recipe.title" label="Title" solo required>{{recipe.title}}</v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="12">
+                    <v-textarea v-model="recipe.ingredients"label="Ingredients" auto-grow box rows="1" solo required>{{recipe.ingredients}}</v-textarea>
+                  </v-col>
+
+                  <v-col cols="12" md="12">
+                    <v-textarea v-model="recipe.description" label="Description" solo required>{{recipe.description}}</v-textarea>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-select :items="itemDifficulty" v-model="recipe.difficulty" label="Difficulty" type="number" solo required></v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field v-model="recipe.person" label="Person" type="number" solo required></v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field v-model="recipe.time" label="Time" type="number" solo required></v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-select :items="itemTypeFoods" v-model="recipe.typeFood" label="TypeFood" solo required>{{recipe.typeFood}}</v-text-select>
+                  </v-col>
+                </v-row>
+              </v-container>            
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-container>
+              <v-row>
+                <v-col cols="9">
+                    <v-btn @click="saveRecipe()" type="submit" color="teal accent-4" dark block>Save</v-btn>
+                </v-col>
+                <v-col cols="3">
+                  <v-btn @click="dialog=false" color="blue-grey" dark >Cancel</v-btn>
+                </v-col>
+
+              </v-row>
+              
+            </v-container>
+
+            
+          </v-card-actions>
+          </v-form>
+        </v-card>
+      </v-dialog>
+      </v-main>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.js" integrity="sha512-nqIFZC8560+CqHgXKez61MI0f9XSTKLkm0zFVm/99Wt0jSTZ7yeeYwbzyl0SGn/s8Mulbdw+ScCG41hmO2+FKw==" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.0.2/dist/sweetalert2.all.min.js"></script>
+
+  <script>
+    let url = 'http://localhost:3000/api/recipes/';
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+       data() {
+        return {            
+            recipes: [],
+            dialog: false,
+            operacion: '',            
+            recipe:{
+                recipeID : null,
+                title    : '',
+                ingredients    : '',  
+                description:'',
+                difficulty:'',
+                person:'',
+                time:'',
+                typeFood:''
+            },
+            itemTypeFoods: ['Breakfast', 'Lunch', 'Dinner', 'snack'],
+            itemDifficulty: ['Very easy','Easy', 'Middle', 'Difficult','Very difficult']
+
+        }
+       },
+       created(){               
+            this.showRecipe()
+       },  
+       methods:{          
+            //CRUD METHODS
+            showRecipe:function(){
+              axios.get(url).then(response =>{
+                this.recipes = response.data;                   
+              })
+            },
+            createRecipe:function(){
+                let parametros = {title:this.recipe.title, ingredients:this.recipe.ingredients, description:this.recipe.description, difficulty:this.recipe.difficulty, person:this.recipe.person, time:this.recipe.time,  typeFood:this.recipe.typeFood  };                
+                axios.post(url, parametros)
+                .then(response =>{
+                  this.showRecipe();
+                });
+                this.recipe.title="";
+                this.recipe.ingredients="";
+                this.recipe.description="";
+                this.recipe.difficulty="";
+                this.recipe.person="";
+                this.recipe.time="";
+                this.recipe.typeFood="";
+            },                        
+            editRecipe: function(){
+            let parametros = {recipeID:this.recipe.recipeID , title:this.recipe.title, ingredients:this.recipe.ingredients, description:this.recipe.description, difficulty:this.recipe.difficulty, person:this.recipe.person, time:this.recipe.time, typeFood:this.recipe.typeFood };                            
+            //console.log(parametros);                   
+                 axios.put(url+this.recipe.recipeID, parametros)                            
+                  .then(response => {                                
+                     this.showRecipe();
+                  })                
+                  .catch(error => {
+                      console.log(error);            
+                  });
+            },
+            deleteRecipe:function(id){
+             Swal.fire({
+                title: '¿Confirma eliminar el registro?',   
+                confirmButtonText: `Confirmar`,                  
+                showCancelButton: true,                          
+              }).then((result) => {                
+                if (result.isConfirmed) {      
+                      //process to delete
+                      axios.delete(url+id)
+                      .then(response =>{           
+                          this.showRecipe();
+                       });      
+                      Swal.fire('¡Eliminado!', '', 'success')
+                } else if (result.isDenied) {                  
+                }
+              });              
+            },
+
+            
+            //buttons  and forms
+            saveRecipe:function(){
+              if(this.operacion=='createRecipe'){
+                this.createRecipe();                
+              }
+              if(this.operacion=='editRecipe'){ 
+                this.editRecipe();                           
+              }
+              this.dialog=false;                        
+            }, 
+            newForm:function () {
+              this.dialog=true;
+              this.operacion='createRecipe';
+
+              this.recipe.title= '';
+              this.recipe.ingredients='';
+              this.recipe.description='';     
+              this.recipe.difficulty='';
+              this.recipe.person='';
+              this.recipe.time='';
+              this.recipe.typeFood='';
+            },
+            editForm:function(recipeID, title, ingredients, description, difficulty, person, time, typeFood){
+
+              this.recipe.recipeID  = recipeID ;
+              this.recipe.title = title;
+              this.recipe.ingredients = ingredients;
+              this.recipe.description = description;     
+              this.recipe.difficulty = difficulty;
+              this.recipe.person = person;
+              this.recipe.time= time;
+              this.recipe.typeFood= typeFood;
+
+              this.dialog=true;                            
+              this.operacion='editRecipe'; 
+            }
+       }      
+    });
+  </script>
+</body>
+</html> 
